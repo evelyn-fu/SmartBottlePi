@@ -25,7 +25,7 @@ ser = serial.Serial('/dev/ttyACM0', 115200)
 while 1:
     if(ser.in_waiting > 0 and ser.readline()[-1] == "\n"):
         if button.is_pressed:
-
+            print("adding data:", len(xs))
             line = ser.readline()
             if len(line.split(" ")) > 1:
                 roll, pitch = line.split(" ")
@@ -34,7 +34,9 @@ while 1:
             if last_pressed:
                 for x in xs:
                     ys.append(2.75 / len(xs))
+                print("training model")
                 model.fit(xs, ys)
+                print("done training")
 
                 with open('model.pkl', 'wb') as f:
                     pickle.dump(model, f)
