@@ -11,7 +11,7 @@ import numpy as np
 class LinearRegression:
 
     def __init__(self):
-        self.theta = np.random.random([3, 1]) * 2 - 1
+        self.theta = [1.0, 1.0, 1.0]
         self.alpha = 0.0001
         self.iters = 1000
 

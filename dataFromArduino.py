@@ -1,37 +1,40 @@
 import serial
-import pandas as pd
-from sklearn.linear_model import LinearRegression
-from sklearn import model_selection
+from lr import LinearRegression
 import pickle
 from gpiozero import Button
 from time import sleep
+import numpy as np
 
 button = Button(15)
 model = None
 with open('model.pkl', 'rb') as f:
     model = pickle.load(f)
-
-model = LinearRegression()
-
-sleep(100)
 last_pressed = False
-
+print("test")
 xs = []
 ys = []
 
 email = "test@bhagat.io"
 url = "https://smartbottleserver.heroku.app/data"
 ser = serial.Serial('/dev/ttyACM0', 115200)
+
 while True:
-    if(ser.in_waiting > 0 and ser.readline()[-1] == "\n"):
-        line = ser.readline()
+    
+    
+    if(ser.in_waiting > 0):
+        line = str(ser.readline())
+        print(line)
+        print(button.is_pressed)
         roll, pitch = None, None
         if len(line.split(" ")) > 1:
             roll, pitch = line.split(" ")
+            roll = float(roll)
+            print(pitch[:-4])
+            pitch = float(pitch[:-4])
         if button.is_pressed:
             if roll != None:
                 print("adding xs:", len(xs))
-                xs.append([roll, pitch])
+                xs.append([1, roll, pitch])
         else:
             if last_pressed:
                 for x in xs:
@@ -45,7 +48,7 @@ while True:
 
             else:
                 if roll != None:
-                    drank = model.predict([roll, pitch])
-                    r = requests.post(url, data={"roll": roll, "pitch": pitch})
+                    drank = model.predict(np.array([1, roll, pitch]))
+                    r = requests.post(url, data={"drank": drank})
 
         last_pressed = button.is_pressed
