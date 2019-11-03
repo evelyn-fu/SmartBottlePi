@@ -22,7 +22,7 @@ ys = []
 email = "test@bhagat.io"
 url = "https://smartbottleserver.heroku.app/data"
 ser = serial.Serial('/dev/ttyACM0', 115200)
-while 1:
+while True:
     if(ser.in_waiting > 0 and ser.readline()[-1] == "\n"):
         line = ser.readline()
         roll, pitch = None, None
@@ -30,12 +30,15 @@ while 1:
             roll, pitch = line.split(" ")
         if button.is_pressed:
             if roll != None:
+                print("adding xs:", len(xs))
                 xs.append([roll, pitch])
         else:
             if last_pressed:
                 for x in xs:
                     ys.append(2.75 / len(xs))
+                print("training model")
                 model.fit(xs, ys)
+                print("done training")
 
                 with open('model.pkl', 'wb') as f:
                     pickle.dump(model, f)
