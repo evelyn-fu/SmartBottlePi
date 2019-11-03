@@ -7,33 +7,38 @@ from gpiozero import Button
 from time import sleep
 
 button = Button(15)
+model = None
+with open('model.pkl', 'rb') as f:
+    model = pickle.load(f)
 
 model = LinearRegression()
-model.fit()
+
+sleep(100)
+last_pressed = False
+
+xs = []
+ys = []
 
 email = "test@bhagat.io"
 url = "https://smartbottleserver.heroku.app/data"
 ser = serial.Serial('/dev/ttyACM0', 115200)
 while 1:
     if(ser.in_waiting > 0 and ser.readline()[-1] == "\n"):
-        line = ser.readline()
-        #"roll:angle1;pitch:angle2"
-       # data = re.split(': |; ', line)
-        #roll = int(data[1])
-        #pitch = int(data[3])
-        if len(line.split(" ")) > 1:
-            roll, pitch = line.split(" ")
+        if button.is_pressed:
+
+            line = ser.readline()
+            if len(line.split(" ")) > 1:
+                roll, pitch = line.split(" ")
+                xs.append([roll, pitch])
+        else:
+            if last_pressed:
+                for x in xs:
+                    ys.append(2.75 / len(xs))
+                model.fit(xs, ys)
+
+                with open('model.pkl', 'wb') as f:
+                    pickle.dump(model, f)
 
 
-            r = requests.post(url, params={"roll": roll, "pitch": pitch, "email":email})
-            
-
-
-while True:
-    if button.is_pressed:
-        print("Pressed")
-    else:
-        print("Released")
-    sleep(1)
-            
-        
+        last_pressed = button.is_pressed
+            # r = requests.post(url, params={"roll": roll, "pitch": pitch, "email":email})
