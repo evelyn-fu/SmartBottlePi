@@ -24,11 +24,12 @@ url = "https://smartbottleserver.heroku.app/data"
 ser = serial.Serial('/dev/ttyACM0', 115200)
 while 1:
     if(ser.in_waiting > 0 and ser.readline()[-1] == "\n"):
+        line = ser.readline()
+        roll, pitch = None, None
+        if len(line.split(" ")) > 1:
+            roll, pitch = line.split(" ")
         if button.is_pressed:
-
-            line = ser.readline()
-            if len(line.split(" ")) > 1:
-                roll, pitch = line.split(" ")
+            if roll != None:
                 xs.append([roll, pitch])
         else:
             if last_pressed:
@@ -39,6 +40,9 @@ while 1:
                 with open('model.pkl', 'wb') as f:
                     pickle.dump(model, f)
 
+            else:
+                if roll != None:
+                    drank = model.predict([roll, pitch])
+                    r = requests.post(url, data={"roll": roll, "pitch": pitch})
 
         last_pressed = button.is_pressed
-            # r = requests.post(url, params={"roll": roll, "pitch": pitch, "email":email})

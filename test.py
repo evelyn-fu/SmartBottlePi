@@ -1,11 +1,16 @@
 import serial
 import pandas as pd
-from sklearn.linear_model import LinearRegression
-from sklearn import model_selection
+from lr import LinearRegression
 import pickle
 from time import sleep
 
 
 model = LinearRegression()
+print(model.theta)
 with open('model.pkl', 'wb') as f:
     pickle.dump(model, f)
+
+
+with open('model.pkl', 'rb') as f:
+    model = pickle.load(f)
+    print(model.theta)
